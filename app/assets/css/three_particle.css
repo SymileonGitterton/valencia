@@ -1,0 +1,18 @@
+canvas {
+    background-color:black;
+}
+body {
+    margin: 20px;
+}
+#stats {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 200px !important;
+    /* for some reason this keeps getting overridden */
+}
+/*  if you really want to override the css 
+.dg .main{
+    width: 400px !important;
+}
+*/

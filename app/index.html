@@ -14,6 +14,13 @@
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 		<link href="app/assets/css/style.css" rel="stylesheet">
+
+		<!-- threejs particle simulation -->
+        <link href="app/assets/css/three_particle.css" rel="stylesheet">
+
+		<!-- brething particles -->
+        <link href="app/assets/css/breathing.css" rel="stylesheet">
+
 </head>
 	
 	
@@ -67,8 +74,11 @@
 					<!-- begin viz 1 -->
 					<div class=".col-xs-12 .col-md-8">
 						<h3>Visualization on ABC</h3>
-						<p>In this visualization, I wanted to display a, b, and c. </p>
-						<canvas id="viz_1"></canvas>
+						<p>In this visualization, I wanted to just get SOMETHING to work </p>
+						<!--PMA <canvas id="viz_1"></canvas> -->
+						<div id="three_particle_container">
+							<canvas id="three_particle"></canvas>
+						</div>
 						<hr>
 					</div>
 					<!-- end viz 1 -->
@@ -77,8 +87,11 @@
 					<!-- begin viz 2 -->
 					<div class=".col-xs-12 .col-md-8">
 						<h3>Visualization on XYZ</h3>
-						<p>In this visualization, I wanted to display x, y, z. </p>
-						<canvas id="viz_2"></canvas>
+						<p>In this visualization, I wanted to show something organic-seeming. </p>
+						<!--PMA <canvas id="viz_2"></canvas> -->
+						<div id="breath of life">
+							<canvas id="breathing"></canvas>
+						</div>						
 						<hr>
 					</div>
 					<!-- end viz 2 -->
@@ -108,7 +121,13 @@
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js'></script>
 	<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js'></script>
 	<script src='https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.15/require.min.js'></script>	
-	<script src='assets/js/noisy_lines.js'></script>
+	<!--PMA <script src='assets/js/noisy_lines.js'></script> -->
+
+	<script src='assets/js/three.min.js'></script>
+	<script src='assets/js/Stats.min.js'></script>
+    <script src='assets/js/dat.gui.min.js'></script>
+    <script src='assets/js/three_particle.js'></script>
+    <script src='assets/js/breathing.js'></script>
 
 </body>
 </html>
