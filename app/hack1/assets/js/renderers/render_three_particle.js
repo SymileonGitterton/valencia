@@ -140,6 +140,50 @@ Particle.prototype.set_parameters = function(){
     this.gravity = -.1;
 }
 
+
+
+
+//PMA Step 6, from render_processing_boid.js    
+// ---------------------------------------------------------
+// Boid Render Prototype Methods
+
+// add properties
+Boid.prototype.set_hue  = function(){ this.hue = 180 * Math.random(); }
+Boid.prototype.set_radius = function(){ this.radius = Math.random() * 40; }
+Boid.prototype.set_rotation = function(){ 
+    this.rotation   = new THREE.Vector3();
+    this.rotation.x = this.rotation.y = this.rotation.z = 0;
+
+    this.rotation_v = new THREE.Vector3();
+    this.rotation_v.x = Math.random()/10;
+    this.rotation_v.y = Math.random()/10;
+    this.rotation_v.z = Math.random()/10;
+}
+
+
+// draw method
+Boid.prototype.draw = function(){
+    // color
+    // var velocity_length = Math.sqrt( Math.pow(this.velocity.x,2) + Math.pow(this.velocity.y,2) + Math.pow(this.velocity.z,2) );
+    var momentum = this.velocity.length() * this.radius;
+    var intensity = momentum/150 * 360;
+    $p.fill(intensity, intensity, intensity, 270);
+
+    // rotate
+    this.rotation.add(this.rotation_v);
+    
+    // 3D shape
+    $p.translate(this.position.x, this.position.y, this.position.z);
+    $p.rotate(this.rotation.x, this.rotation.y, this.rotation.z);
+    $p.box(this.radius);
+    $p.rotate(-this.rotation.x, -this.rotation.y, -this.rotation.z);
+    $p.translate(-this.position.x, -this.position.y, -this.position.z);
+}
+
+
+
+
+
 // add particles
 var n = 500;
 
@@ -154,6 +198,18 @@ for (var i = 0; i < n; i++){
 }
 
 scene.add(parent);
+
+//PMA Step 7, from render_processing_boid.js
+//// add boids
+//var n = 200, data = [];
+//for (var i = 0; i < n; i++){
+//    data[i] = new Boid();
+//    data[i].set_hue();
+//    data[i].set_radius();
+//    data[i].set_rotation();
+//    data[i].setWorldSize($p.width, $p.height, $p.width * 1.5);
+//}
+    
 
 // ------------------------------------------------------------------------------------------------
 // Light
