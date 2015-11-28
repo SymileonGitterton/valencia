@@ -6,9 +6,9 @@ body {
 }
 #stats {
     position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 200px !important;
+    left: 20px;
+    top: 220px;
+    width: 100px !important;
     /* for some reason this keeps getting overridden */
 }
 /*  if you really want to override the css 
