@@ -164,7 +164,7 @@ function hello_world($p) {
         
 		gravityAngle += gravityAngleIncrement;
         if (++frameCount === convergeStartFrameCount) {
-          	console.log("frameCount reached ",frameCount," converging begins...");
+          	//console.log("frameCount reached ",frameCount," converging begins...");
         	for (var i=0;i<data.length;i++) {
             	var convergeMagnitude = Math.sqrt(Math.pow(data[i].x_v,2) + Math.pow(data[i].y_v,2)); // Pythagomaras
         		if (convergeMagnitude > 0) {
@@ -193,7 +193,7 @@ function hello_world($p) {
             }
                 
     	} else if(frameCount >= divergeStartFrameCount) {
-        	console.log("frameCount reached ",frameCount," back to diverging");
+        	//console.log("frameCount reached ",frameCount," back to diverging");
             for (var i=0;i<data.length;i++) {
                 var convergeMagnitude = Math.sqrt(Math.pow(data[i].x_v,2) + Math.pow(data[i].y_v,2)); // Pythagomaras
                 if (convergeMagnitude > 0) {
