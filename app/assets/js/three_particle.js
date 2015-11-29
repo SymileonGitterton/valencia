@@ -72,7 +72,7 @@ var vectorCrossProduct = function(vector1, vector2) {
 //===================================================
 // simulation parameters
 //===================================================
-var rootBigGM = Math.pow(1000.0, 1/2);
+var rootBigGM = Math.pow(2000.0, 1/2);
 var planetMaxRadius = 20;
 var n = 10;
 
@@ -139,7 +139,8 @@ var particle = function (width, height) {
     this.obj = new THREE.Mesh(
     geom,
     new THREE.MeshPhongMaterial({
-        color: Math.floor(Math.random() * 0x1000000),
+        //color: Math.floor(Math.random() * 0x1000000),
+        color: (Math.floor(Math.random() * 16) * Math.pow(2, 20)) + (Math.floor(Math.random() * 16) * Math.pow(2, 12)) + (Math.floor(Math.random() * 16) * Math.pow(2, 4)),
         specular: 0x333333,
         shininess: 100
     }));
@@ -253,7 +254,7 @@ function buildAxis( src, dst, colorHex, dashed ) {
 }
 
 axes = buildAxes( WIDTH/2 );
-parent.add( axes );
+//PMA parent.add( axes );
 
 // ------------------------------------------------------------------------------------------------
 // add Bounding box
@@ -266,7 +267,7 @@ parent.add( axes );
 var bounding_box = new THREE.BoundingBoxHelper(parent); // can be tied to scene
 //var bounding_box = new THREE.BoundingBoxHelper( mesh ); // can be tied to mesh
 bounding_box.update(); // render
-parent.add(bounding_box);
+//PMA parent.add(bounding_box);
 
 // ------------------------------------------------------------------------------------------------
 // add lots of boxes
@@ -275,6 +276,7 @@ parent.add(bounding_box);
 //PMA var balls = []; // An array of objects, each object has data for one bouncing ball.
 var data = [];
 
+// generate n partiles
 for (var i = 0; i < n; i++) {
     var p = new particle(WIDTH/2, HEIGHT/2);
     p.obj.position.set(p.x, p.y, p.z);
@@ -283,6 +285,7 @@ for (var i = 0; i < n; i++) {
     data.push(p);
 }
 
+// add the Sun at the origin
 var theSun = new THREE.Mesh(
     new THREE.SphereGeometry(50, 20, 12),
     new THREE.MeshPhongMaterial({
