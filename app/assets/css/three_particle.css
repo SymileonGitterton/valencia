@@ -2,12 +2,12 @@ canvas {
     background-color:black;
 }
 body {
-    margin: 20px;
+    margin: 0px;
 }
 #stats {
     position: absolute;
-    left: 20px;
-    top: 220px;
+    left: 50px;
+    top: 200px;
     width: 100px !important;
     /* for some reason this keeps getting overridden */
 }

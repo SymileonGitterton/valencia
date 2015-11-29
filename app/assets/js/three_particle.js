@@ -14,7 +14,7 @@ renderer.setSize(WIDTH, HEIGHT);
 
 var camera = new THREE.PerspectiveCamera(50, WIDTH / HEIGHT, 0.1, 3*WIDTH);
 camera.position.set(0, 200, 1000);
-camera.rotation.set(-.2, 0, 0);
+camera.rotation.set(0, 0, 0); //(-.2, 0, 0);
 scene.add(camera);
 
 // ------------------------------------------------------------------------------------------------
@@ -26,6 +26,19 @@ document.getElementById("three_particle_container").appendChild(stats.domElement
 
 var gui = new dat.GUI({ autoPlace: false });
 document.getElementById('three_particle_container').appendChild(gui.domElement);
+
+
+//===================================================
+// gravity and drag parameters
+//===================================================
+var gravity = 0.5;                          // gravity magnitude
+var gravityAngle = (1/2) * Math.PI;         // initially straight down (radians)
+//var gravityAngleIncrement = 0.002 * (2 * Math.PI);    // gravity rotation each frame (radians)  
+var gravityAngleIncrement = 0;              // zero for no gravity whirlpool
+var drag = 0.990; // 0.995
+var areaDragFactor = 0.00001;   // 0 for no effect; 0.00001 or similar 
+                                // for bouncy little guys + sluggish big fellas
+
 
 
 // ------------------------------------------------------------------------------------------------
@@ -207,9 +220,9 @@ parent.add(bounding_box);
 // add lots of boxes
 // ported from http://codepen.io/brianarn/pen/whDHk
 
-var balls = []; // An array of objects, each object has data for one bouncing ball.
+//PMA var balls = []; // An array of objects, each object has data for one bouncing ball.
 var data = [];
-var n = 200;
+var n = 1;//200;
 
 
 
@@ -244,9 +257,9 @@ scene.add(directionalLight2);
 
 var controls = new function () {
         // add your params here
-        this.x_rot_v = 0.02;
-        this.y_rot_v = 0.02;
-        this.z_rot_v = 0.02;
+        this.x_rot = 0.02;
+        this.y_rot = 0.02;
+        this.z_rot = 0.02;
         this.p_x_rot_v = 0;
         this.p_y_rot_v = 0.01;
         this.p_z_rot_v = 0;
@@ -255,9 +268,9 @@ var controls = new function () {
         this.direction_light_2 = true;
     }
 
-gui.add(controls, 'x_rot_v', 0, 0.5);
-gui.add(controls, 'y_rot_v', 0, 0.5);
-gui.add(controls, 'z_rot_v', 0, 0.5);
+gui.add(controls, 'x_rot', 0, 2*Math.PI);
+gui.add(controls, 'y_rot', 0, 2*Math.PI);
+gui.add(controls, 'z_rot', 0, 2*Math.PI);
 gui.add(controls, 'p_x_rot_v', 0, 0.5);
 gui.add(controls, 'p_y_rot_v', 0, 0.5);
 gui.add(controls, 'p_z_rot_v', 0, 0.5);
@@ -307,6 +320,10 @@ function draw() {
     parent.rotation.x += controls.p_x_rot_v;
     parent.rotation.y += controls.p_y_rot_v;
     parent.rotation.z += controls.p_z_rot_v;
+
+    camera.rotation.x = controls.x_rot;
+    camera.rotation.y = controls.y_rot;
+    camera.rotation.z = controls.z_rot;
 
     // render scene
     renderer.render(scene, camera);
