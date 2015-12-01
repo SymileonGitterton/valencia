@@ -1,16 +1,13 @@
-//PMA Step 4 copied in from supplied file render_three_particle.js
-//PMA Step 5 get canvas with id "three_boid" not "three_particle" and other changes
-
 // ------------------------------------------------------------------------------------------------
 // scene, camera, and renderer go here
 
 var SCENE_WIDTH = SCENE_HEIGHT = 500;
 
 // create a canvas and a renderer, then append to document
-var canvas = document.getElementById("three_boid");
+var canvas = document.getElementById("three_particle");
 var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true}); // use webgl renderer (GPU!)
 renderer.setSize(SCENE_WIDTH, SCENE_HEIGHT); // Resizes the output canvas to (width, height), and also sets the viewport to fit that size, starting in (0, 0).
-//PMA Step 5 document.body.appendChild(renderer.domElement); // attach renderer to canvas
+document.body.appendChild(renderer.domElement); // attach renderer to canvas
 
 // scene - where we put our models
 var scene = new THREE.Scene();
@@ -20,7 +17,7 @@ var camera = new THREE.PerspectiveCamera( 45, SCENE_WIDTH / SCENE_HEIGHT, 1, 100
 camera.position.set( SCENE_WIDTH, SCENE_HEIGHT/2, 2000 );
 
 // orbit controls - how we use our mouse to move the camera
-var controls = new THREE.OrbitControls( camera, canvas );   //PMA Step 5 added canvas argument
+var controls = new THREE.OrbitControls( camera );
 controls.addEventListener( 'change', render );
 
 // ------------------------------------------------------------------------------------------------
@@ -177,16 +174,12 @@ scene.add(directionalLight2);
 
 var stats = new Stats();
 stats.setMode(0); // 0: fps, 1: ms
-//document.body.appendChild(stats.domElement);
-document.getElementById('dat_gui_container').appendChild(stats.domElement); //PMA Step 5
-
-//PMA Step 5
-stats.domElement.style.float = 'right';
+document.body.appendChild(stats.domElement);
 
 // align top-left
-//PMA stats.domElement.style.position = 'absolute';
-//PMA stats.domElement.style.left = '0px';
-//PMA stats.domElement.style.top = '0px';
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.left = '0px';
+stats.domElement.style.top = '0px';
 
 // ------------------------------------------------------------------------------------------------
 // add controls and GUI
@@ -205,7 +198,6 @@ var controls = new function () {
 }
 
 var gui = new dat.GUI();
-document.getElementById('dat_gui_container').appendChild(gui.domElement);
 gui.add(controls, 'x_rot_v', 0, 0.5);
 gui.add(controls, 'y_rot_v', 0, 0.5);
 gui.add(controls, 'z_rot_v', 0, 0.5);
@@ -279,4 +271,3 @@ function render() {
 requestAnimationFrame(draw);
 
 // ------------------------------------------------------------------------------------------------
-
