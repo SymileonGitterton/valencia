@@ -5,9 +5,9 @@ body {
     margin: 0px;
 }
 #stats {
-    position: absolute;
+    position: relative;
     left: 50px;
-    top: 200px;
+    top: 0px;
     width: 100px !important;
     /* for some reason this keeps getting overridden */
 }

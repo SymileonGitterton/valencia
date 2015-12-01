@@ -75,6 +75,7 @@ var vectorCrossProduct = function(vector1, vector2) {
 var rootBigGM = Math.pow(2000.0, 1/2);
 var planetMaxRadius = 20;
 var n = 10;
+var axisWidth = 2;
 
 // ------------------------------------------------------------------------------------------------
 // geometry
@@ -225,10 +226,10 @@ function buildAxes( length ) {
     var axes = new THREE.Object3D();
     axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X
     axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z
-    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0xdddddd, false ) ); // +Y
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0xdddddd, true ) ); // -Y
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0xdddddd, false ) ); // +Z
+    axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0xdddddd, true ) ); // -Z
     return axes;
 
 }
@@ -238,9 +239,9 @@ function buildAxis( src, dst, colorHex, dashed ) {
         mat; 
 
     if(dashed) {
-            mat = new THREE.LineDashedMaterial({ linewidth: 3, color: colorHex, dashSize: 3, gapSize: 3 });
+            mat = new THREE.LineDashedMaterial({ linewidth: axisWidth, color: colorHex, dashSize: 3, gapSize: 3 });
     } else {
-            mat = new THREE.LineBasicMaterial({ linewidth: 3, color: colorHex });
+            mat = new THREE.LineBasicMaterial({ linewidth: axisWidth, color: colorHex });
     }
 
     geom.vertices.push( src.clone() );
@@ -254,7 +255,8 @@ function buildAxis( src, dst, colorHex, dashed ) {
 }
 
 axes = buildAxes( WIDTH/2 );
-//PMA parent.add( axes );
+//PMA 
+parent.add( axes );
 
 // ------------------------------------------------------------------------------------------------
 // add Bounding box
@@ -317,6 +319,7 @@ scene.add(directionalLight2);
 
 var controls = new function () {
         // add your params here
+        this.zoom = 1000;
         this.x_rot = -0.20;
         this.y_rot = 0.01;
         this.z_rot = 0.01;
@@ -328,6 +331,7 @@ var controls = new function () {
         this.direction_light_2 = true;
     }
 
+gui.add(controls, 'zoom', 50, 1500);
 gui.add(controls, 'x_rot', -0.50, 0.50);
 gui.add(controls, 'y_rot', -0.50, 0.50);
 gui.add(controls, 'z_rot', -1.00*Math.PI, 1.00*Math.PI);
@@ -384,6 +388,9 @@ function draw() {
     camera.rotation.x = controls.x_rot;
     camera.rotation.y = controls.y_rot;
     camera.rotation.z = controls.z_rot;
+
+    camera.position.z = controls.zoom;
+    camera.position.y = 0.2 * controls.zoom;
 
     // render scene
     renderer.render(scene, camera);
