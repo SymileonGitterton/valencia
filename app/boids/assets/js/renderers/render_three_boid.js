@@ -44,6 +44,11 @@ Finally, put the boids with three js renderer in your portfolio. This completes 
 */
 
 
+
+
+
+//PMA Step 4 code copied in from render_three_particle.js
+
 // ------------------------------------------------------------------------------------------------
 // scene, camera, and renderer go here
 
@@ -122,8 +127,11 @@ bounding_box.update(); // render
 parent.add(bounding_box);
 
 
+
+
+
 //PMA step 6 copied in from render_processing_boid.js
-// to be adapted.
+// to be adapted or just referred to?
 // ---------------------------------------------------------
 // Boid Render Prototype Methods
 /*
@@ -134,23 +142,22 @@ Boid.prototype.set_rotation = function(){
     this.rotation   = new THREE.Vector3();
     this.rotation.x = this.rotation.y = this.rotation.z = 0;
 
-     this.rotation_v = new THREE.Vector3();
-     this.rotation_v.x = Math.random()/10;
-     this.rotation_v.y = Math.random()/10;
-     this.rotation_v.z = Math.random()/10;
-}
+    this.rotation_v = new THREE.Vector3();
+    this.rotation_v.x = Math.random()/10;
+    this.rotation_v.y = Math.random()/10;
+    this.rotation_v.z = Math.random()/10;
+ }
 
 // draw method
 Boid.prototype.draw = function(){
     // color
-    // var velocity_length = Math.sqrt( Math.pow(this.velocity.x,2) + Math.pow(this.velocity.y,2) + Math.pow(this.velocity.z,2) );
     var momentum = this.velocity.length() * this.radius;
     var intensity = momentum/150 * 360;
     $p.fill(intensity, intensity, intensity, 270);
 
     // rotate
     this.rotation.add(this.rotation_v);
-        
+    
     // 3D shape
     $p.translate(this.position.x, this.position.y, this.position.z);
     $p.rotate(this.rotation.x, this.rotation.y, this.rotation.z);
@@ -161,17 +168,106 @@ Boid.prototype.draw = function(){
 */
 
 
-/* //PMA step 7
-// add boids
-var n = 200, data = [];
-for (var i = 0; i < n; i++){
-    data[i] = new Boid();
-    data[i].set_hue();
-    data[i].set_radius();
-    data[i].set_rotation();
-    data[i].setWorldSize($p.width, $p.height, $p.width * 1.5);
+//PMA I think this should be uncommented...
+// ---------------------------------------------------------
+// Boid Render Prototype Methods
+
+// add properties
+Boid.prototype.set_hue  = function(){ this.hue = 180 * Math.random(); }
+Boid.prototype.set_radius = function(){ this.radius = Math.random() * 40; }
+Boid.prototype.set_rotation = function(){ 
+    this.rotation   = new THREE.Vector3();
+    this.rotation.x = this.rotation.y = this.rotation.z = 0;
+
+    this.rotation_v = new THREE.Vector3();
+    this.rotation_v.x = Math.random()/10;
+    this.rotation_v.y = Math.random()/10;
+    this.rotation_v.z = Math.random()/10;
+ }
+
+/*
+// draw method
+Boid.prototype.draw = function(){
+    // color
+    var momentum = this.velocity.length() * this.radius;
+    var intensity = momentum/150 * 360;
+    $p.fill(intensity, intensity, intensity, 270);
+
+    // rotate
+    this.rotation.add(this.rotation_v);
+    
+    // 3D shape
+    $p.translate(this.position.x, this.position.y, this.position.z);
+    $p.rotate(this.rotation.x, this.rotation.y, this.rotation.z);
+    $p.box(this.radius);
+    $p.rotate(-this.rotation.x, -this.rotation.y, -this.rotation.z);
+    $p.translate(-this.position.x, -this.position.y, -this.position.z);
 }
 */
+
+
+
+//PMA step 8 - make Boid class prototypes by hacking particle class prototypes
+//PMA step 8 - originally brought in from render_three_particle.js, e.g. as particle.prototype.create_geometry() etc.
+// ---------------------------------------------------------
+// Boid Render Prototype Methods
+
+Boid.prototype.create_geometry = function(){
+
+    // http://threejs.org/docs/#Reference/Extras.Geometries/BoxGeometry
+    this.geometry = new THREE.BoxGeometry( this.radius, this.radius, this.radius);
+}
+
+Boid.prototype.create_material = function(){
+    // http://threejs.org/docs/#Reference/Math/Color
+    this.color = new THREE.Color();
+    this.color.setHSL( Math.random(), .85, .5 );
+
+    // http://threejs.org/docs/#Reference/Materials/MeshPhongMaterial
+    this.material = new THREE.MeshPhongMaterial({
+        color: this.color,
+        specular: 0x333333,
+        shininess: .9
+    });
+    this.material.transparent = true;
+    this.material.opacity = .75;
+}
+
+Boid.prototype.create_mesh = function(){
+    // http://threejs.org/docs/#Reference/Objects/Mesh
+    this.mesh = new THREE.Mesh(
+        this.geometry,
+        this.material
+    );
+    this.mesh.position.set(this.x, this.y, this.z);
+    console.log(this.mesh);
+}
+
+Boid.prototype.init_mesh_obj = function(){
+    this.create_geometry();
+    this.create_material();
+    this.create_mesh();
+}
+
+Boid.prototype.update_mesh = function(){
+    // update rotation ( rotation is a vector of type Euler http://threejs.org/docs/#Reference/Math/Euler )
+    this.mesh.position.set(this.position.x, this.position.y, this.position.z);
+    //this.mesh.rotation.setFromVector3(new THREE.Vector3(this.rx, this.ry, this.rz));
+    this.mesh.rotation.setFromVector3(new THREE.Vector3(this.rotation.x, this.rotation.y, this.rotation.z));
+
+    // calculate momentum and apply it to the color
+    //var momentum = Math.sqrt( Math.pow(this.x_v,2) + Math.pow(this.y_v,2) + Math.pow(this.z_v,2) ) * this.radius;
+    var momentum = this.velocity.length() * this.radius;    //PMA step 8
+    var intensity = momentum/200;
+    if(intensity < 0) intensity = 0;
+    if(intensity > 1) intensity = 1;
+    this.mesh.material.color.setHSL( intensity, .1 + intensity * .85, .2 + intensity * .4);
+}
+
+Boid.prototype.set_parameters = function(){
+    // gravity is a downward force, -.1 makes the objects fly around longer
+    this.gravity = -.1;
+}
 
 /* //PMA step 6, comment out the un-needed particle methods (we don't have particles) but keep for reference.
 // ---------------------------------------------------------
@@ -253,6 +349,56 @@ for (var i = 0; i < n; i++){
 }
 
 */
+
+
+
+/* //PMA step 7
+// add boids (from render_processing_boids.js)
+var n = 200, data = [];
+for (var i = 0; i < n; i++){
+    data[i] = new Boid();
+    data[i].set_hue();
+    data[i].set_radius();
+    data[i].set_rotation();
+    data[i].setWorldSize($p.width, $p.height, $p.width * 1.5);
+}
+*/
+
+/* //PMA Step 9 as a HINT here is the creation code from render_three_particle.js
+var data = [];
+for (var i = 0; i < n; i++){
+    var p = new Particle(SCENE_WIDTH, SCENE_HEIGHT);
+    p.set_parameters();
+    p.init_mesh_obj();
+
+    parent.add(p.mesh);
+    data.push(p);
+}
+*/
+
+//PMA Step 9 create flock o' boids
+var data = [];
+var n = 200;
+for (var i = 0; i < n; i++) {
+    //var p = new Particle(SCENE_WIDTH, SCENE_HEIGHT);
+    var b = new Boid();    
+    b.set_hue();
+    b.set_radius();
+    b.set_rotation();
+    b.setWorldSize(SCENE_WIDTH, SCENE_HEIGHT, SCENE_WIDTH*1.5);
+
+    //p.set_parameters();
+    b.set_parameters();
+    //p.init_mesh_obj();
+    b.init_mesh_obj();
+
+    //parent.add(p.mesh);
+    parent.add(b.mesh);     // the displayable object of each Boid - put it in the curry
+
+    //data.push(p);
+    data.push(b);
+}
+
 
 
 scene.add(parent);
@@ -351,7 +497,9 @@ function draw() {
     stats.begin();
 
     for (var i = 0; i <n; i++) {
-        data[i].update();
+        //data[i].update();
+        data[i].run(data);
+        //data[i].update_mesh();
         data[i].update_mesh();
     }
 

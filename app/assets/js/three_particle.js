@@ -74,7 +74,7 @@ var vectorCrossProduct = function(vector1, vector2) {
 //===================================================
 var rootBigGM = Math.pow(2000.0, 1/2);
 var planetMaxRadius = 20;
-var n = 10;
+var planetCount = 10;
 var axisWidth = 2;
 
 // ------------------------------------------------------------------------------------------------
@@ -109,29 +109,52 @@ var particle = function (width, height) {
 
     // generate direction vector to planet
     this.orbitalRadius = new pmaVector3(0,0,0);
-    this.orbitalRadius.x = (Math.random() * (2*this.x_max)) - this.x_max;
-    this.orbitalRadius.y = (Math.random() * (2*this.y_max)) - this.y_max;
-    this.orbitalRadius.z = (Math.random() * (2*this.z_max)) - this.z_max;
+    //this.orbitalRadius.x = (Math.random() * (2*this.x_max)) - this.x_max;
+    //this.orbitalRadius.y = (Math.random() * (2*this.y_max)) - this.y_max;
+    //this.orbitalRadius.z = (Math.random() * (2*this.z_max)) - this.z_max;
+    this.orbitalRadius.x = Math.random() * (2*this.x_max);
+    this.orbitalRadius.y = 0;                   // fixed to x-y plane version...
+    this.orbitalRadius.z = 0;                   // fixed to x-y plane version...
 
     // generate another random vector, which with orbitalRadius defines the plane of the ecliptic
     this.planeVector = new pmaVector3(0,0,0);
-    this.planeVector.x = Math.random();
-    this.planeVector.y = Math.random();
-    this.planeVector.z = Math.random();
+    //this.planeVector.x = Math.random();
+    //this.planeVector.y = Math.random();
+    //this.planeVector.z = Math.random();
+    this.planeVector.x = 1;                     // fixed to x-y plane version...
+    this.planeVector.y = 1;
+    this.planeVector.z = 0;
 
     // calculate unit normal vector to the plane of the ecliptic
     this.eclipticNormal = vectorCrossProduct(this.planeVector, this.orbitalRadius);
     var eclipticNormalMagnitude = vectorMagnitude(this.eclipticNormal);
+    console.log("plane(%.3f,%.3f,%.3f) x orbRadius(%.3f,%.3f,%.3f) = eclipticNormal(%.3f,%.3f,%.3f) [mag %.3f]",
+            this.planeVector.x, this.planeVector.y, this.planeVector.z, 
+            this.orbitalRadius.x, this.orbitalRadius.y, this.orbitalRadius.z, 
+            this.eclipticNormal.x, this.eclipticNormal.y, this.eclipticNormal.z, 
+            eclipticNormalMagnitude);
+
     this.eclipticNormal = scalarMultiply(this.eclipticNormal, 1/eclipticNormalMagnitude);
+    eclipticNormalMagnitude = vectorMagnitude(this.eclipticNormal);
+    console.log("eclipticNormal(%.3f,%.3f,%.3f) [mag %.3f]",
+            this.eclipticNormal.x, this.eclipticNormal.y, this.eclipticNormal.z, 
+            eclipticNormalMagnitude);
 
     // scale normal vector to have |eclipticNormal| = |orbitalRadius|^(-3/2)
     // which after v = r x n will yield |orbitalVelocity| = |orbitalRadius|^(-1/2)
     // (this is the condition for a cicular orbit)
     eclipticNormalMagnitude = Math.pow(vectorMagnitude(this.orbitalRadius), -3/2);
     this.eclipticNormal = scalarMultiply(this.eclipticNormal, (eclipticNormalMagnitude * rootBigGM));
+    eclipticNormalMagnitude = vectorMagnitude(this.eclipticNormal);
+    console.log("eclipticNormal(%.3f,%.3f,%.3f) [mag %.3f]",
+            this.eclipticNormal.x, this.eclipticNormal.y, this.eclipticNormal.z, 
+            eclipticNormalMagnitude);
 
     // now we can find orbitalVelocity = orbitalRadius x eclipticNormal
     this.orbitalVelocity = vectorCrossProduct(this.orbitalRadius, this.eclipticNormal);
+    console.log("orbitalVelocity(%.3f,%.3f,%.3f) [mag %.3f] [orbRadius mag = %.3f]",
+            this.orbitalVelocity.x, this.orbitalVelocity.y, this.orbitalVelocity.z, 
+            vectorMagnitude(this.orbitalVelocity), vectorMagnitude(this.orbitalRadius));
 
     // threejs stuff
     this.radius = planetMaxRadius * vectorMagnitude(this.orbitalRadius)/width;   // smaller planets in the middle
@@ -146,72 +169,14 @@ var particle = function (width, height) {
         shininess: 100
     }));
 
-    //this.constrain_x = function () {
-    //    // x
-    //    if (this.x >= this.x_max) {
-    //        this.x = this.x_max;
-    //        this.x_v *= -1;
-    //    }
-    //    if (this.x <= -this.x_max) {
-    //        this.x = -this.x_max;
-    //        this.x_v *= -1;
-    //    }
-    //}
-    //this.constrain_y = function () {
-    //    // y
-    //    if (this.y >= this.y_max) {
-    //        this.y = this.y_max;
-    //        this.y_v *= -1;
-    //    }
-    //    if (this.y <= -this.y_max) {
-    //        this.y = -this.y_max;
-    //        this.y_v *= -1;
-    //    }
-    //}
-    //this.constrain_z = function () { //z
-    //    // z
-    //    if (this.z >= this.z_max) {
-    //        this.z = this.z_max;
-    //        this.z_v *= -1;
-    //    }
-    //    if (this.z <= -this.z_max) {
-    //        this.z = -this.z_max;
-    //        this.z_v *= -1;
-    //    }
-    //}
-
     this.update = function () {
         this.orbitalRadius = vectorAdd(this.orbitalRadius,this.orbitalVelocity);           // new position vector
         this.orbitalVelocity = vectorCrossProduct(this.orbitalRadius,this.eclipticNormal); // new velocity vector
 
-        // y direction
-        //if ((Math.abs(this.y_v) > 0)) {
-        //    this.y_v *= this.drag;
-        //    this.y_v += this.gravity;
-        //    this.y += this.y_v;
-        //    this.constrain_y();
-        //}
-        //// x direction
-        //if ((Math.abs(this.x_v) > 0)) {
-        //    this.x_v *= this.drag;
-        //    this.x += this.x_v;
-        //    this.constrain_x();
-        //}
-        //// z direction                        //z
-        //if ((Math.abs(this.z_v) > 0)) {
-        //    this.z_v *= this.drag;
-        //    this.z += this.z_v;
-        //    this.constrain_z();
-        //}
-
         // hue
-        this.hue += 1;
-        this.hue = this.hue % 360;
+        //this.hue += 1;
+        //this.hue = this.hue % 360;
 
-        //// rotate
-        //this.rx += this.rx_v;
-        //this.ry += this.ry_v;
-        //this.rz += this.rz_v;
     }
 }
 
@@ -276,15 +241,15 @@ bounding_box.update(); // render
 // ported from http://codepen.io/brianarn/pen/whDHk
 
 //PMA var balls = []; // An array of objects, each object has data for one bouncing ball.
-var data = [];
+var orbitData = [];
 
-// generate n partiles
-for (var i = 0; i < n; i++) {
+// generate n particles
+for (var i = 0; i < planetCount; i++) {
     var p = new particle(WIDTH/2, HEIGHT/2);
     p.obj.position.set(p.x, p.y, p.z);
     p.obj.position.set(p.orbitalRadius.x, p.orbitalRadius.y, p.orbitalRadius.z);
     parent.add(p.obj);
-    data.push(p);
+    orbitData.push(p);
 }
 
 // add the Sun at the origin
@@ -317,7 +282,7 @@ scene.add(directionalLight2);
 // ------------------------------------------------------------------------------------------------
 // add controls and GUI
 
-var controls = new function () {
+var orbitControls = new function () {
         // add your params here
         this.zoom = 1000;
         this.x_rot = -0.20;
@@ -331,16 +296,16 @@ var controls = new function () {
         this.direction_light_2 = true;
     }
 
-gui.add(controls, 'zoom', 50, 1500);
-gui.add(controls, 'x_rot', -0.50, 0.50);
-gui.add(controls, 'y_rot', -0.50, 0.50);
-gui.add(controls, 'z_rot', -1.00*Math.PI, 1.00*Math.PI);
-gui.add(controls, 'p_x_rot_v', 0.00, 0.50);
-gui.add(controls, 'p_y_rot_v', 0.00, 0.50);
-gui.add(controls, 'p_z_rot_v', 0.00, 0.50);
+gui.add(orbitControls, 'zoom', 50, 1500);
+gui.add(orbitControls, 'x_rot', -0.50, 0.50);
+gui.add(orbitControls, 'y_rot', -0.50, 0.50);
+gui.add(orbitControls, 'z_rot', -1.00*Math.PI, 1.00*Math.PI);
+gui.add(orbitControls, 'p_x_rot_v', 0.00, 0.50);
+gui.add(orbitControls, 'p_y_rot_v', 0.00, 0.50);
+gui.add(orbitControls, 'p_z_rot_v', 0.00, 0.50);
 
 
-ambient_light = gui.add(controls, 'ambient_light');
+ambient_light = gui.add(orbitControls, 'ambient_light');
 ambient_light.onChange(function (value) {
     if (value) {
         scene.add(ambientLight);
@@ -349,7 +314,7 @@ ambient_light.onChange(function (value) {
     }
 });
 
-direction_light = gui.add(controls, 'direction_light');
+direction_light = gui.add(orbitControls, 'direction_light');
 direction_light.onChange(function (value) {
     if (value) {
         scene.add(directionalLight);
@@ -358,7 +323,7 @@ direction_light.onChange(function (value) {
     }
 });
 
-direction_light_2 = gui.add(controls, 'direction_light_2');
+direction_light_2 = gui.add(orbitControls, 'direction_light_2');
 direction_light_2.onChange(function (value) {
     if (value) {
         scene.add(directionalLight2);
@@ -376,21 +341,21 @@ function draw() {
     // start stats recording
     stats.begin();
 
-    for (var i = 0; i <n; i++) {
-        data[i].update();
-        data[i].obj.position.set(data[i].orbitalRadius.x, data[i].orbitalRadius.y, data[i].orbitalRadius.z);
+    for (var i = 0; i < planetCount; i++) {
+        orbitData[i].update();
+        orbitData[i].obj.position.set(orbitData[i].orbitalRadius.x, orbitData[i].orbitalRadius.y, orbitData[i].orbitalRadius.z);
     }
 
-    parent.rotation.x += controls.p_x_rot_v;
-    parent.rotation.y += controls.p_y_rot_v;
-    parent.rotation.z += controls.p_z_rot_v;
+    parent.rotation.x += orbitControls.p_x_rot_v;
+    parent.rotation.y += orbitControls.p_y_rot_v;
+    parent.rotation.z += orbitControls.p_z_rot_v;
 
-    camera.rotation.x = controls.x_rot;
-    camera.rotation.y = controls.y_rot;
-    camera.rotation.z = controls.z_rot;
+    camera.rotation.x = orbitControls.x_rot;
+    camera.rotation.y = orbitControls.y_rot;
+    camera.rotation.z = orbitControls.z_rot;
 
-    camera.position.z = controls.zoom;
-    camera.position.y = 0.2 * controls.zoom;
+    camera.position.z = orbitControls.zoom;
+    camera.position.y = 0.2 * orbitControls.zoom;
 
     // render scene
     renderer.render(scene, camera);
