@@ -1,5 +1,9 @@
-// breathing
-function hello_world($p) {
+// Valencia
+
+var showStickyBoxes = false;
+var dotsCaptured = 0;
+
+    function hello_world($p) {
     // data holder
     var data = [];
     var stickyBoxes = [];
@@ -15,6 +19,10 @@ function hello_world($p) {
 
     var width = window.innerWidth-200;                  
     var height = window.innerHeight-100;                // thanks D
+    var aspectRatioCanvas     = width / height;
+    var aspectRatioStickyText = 400.0 / 250.0;
+    var aspectCorrection = aspectRatioStickyText / aspectRatioCanvas;
+    var aspectCorrectedWidth = width * aspectCorrection;
     $p.size(width, height);
 
     console.log($p);
@@ -26,18 +34,18 @@ function hello_world($p) {
     // ======================================================
 
     var population = 1000;
-    var gravity = 0.02;//0.5;							// gravity magnitude
+    var gravity = .03; //0.02;//0.5;							// gravity magnitude
     var gravityAngle = (1/2) * Math.PI;			// straight down, in this co-ordinate scheme. (radians)
     //var gravityAngleIncrement = 0.002 * (2 * Math.PI);	// gravity rotation each display time (radians)    
-    var gravityAngleIncrement = 0.01;				// zero for no gravity whirlpool
-    var drag = 1.0;0.999; // 0.995
+    var gravityAngleIncrement = 0.009;				// zero for no gravity whirlpool
+    var drag = 1.0;//0.999; // 0.995
     var areaDragFactor = 0.000001;//0.00001;	// 0 for no effect; 0.00001 or similar for bouncy little guys + sluggish big fellas
-    var radiusMean = 12.0;
+    var radiusMean = 8.0;
     var radisuStandardDeviation = 4.0;
     var velocityMean = 10.0; //13.0;
     var velocityStandardDeviation = 2.0; //4.0;
     var frameCount = 0;
-    var clickedX = $p.width/3;
+    var clickedX = $p.width/2;
     var clickedY = $p.height/2;
     var convergeStartFrameCount =  50;
     var divergeStartFrameCount  = 150;
@@ -46,22 +54,109 @@ function hello_world($p) {
     var captureRange = tractorBeamRange / 20;
     var tractorIdleSpeed = velocityMean / 10;
     var stickyBoxCaptureMax = population;
-    var stickyBoxCaptureScale = 0.025;
+    var stickyBoxCaptureScale = 0.06; //0.038; // 1.0;
+
 
     var stickyList = [  
-        [0.1000,0.1225, 0.4000,0.6600],
+        [0.1000,0.1225, 0.4000,0.4900], // D
+        [0.1000,0.1225, 0.4900,0.5800],
+        [0.1000,0.1225, 0.5800,0.6600],
         [0.1225,0.1750, 0.4000,0.4280],
         [0.1225,0.1750, 0.6320,0.6600],
         [0.1750,0.1925, 0.4080,0.4360],
         [0.1750,0.1925, 0.6240,0.6520],
         [0.1925,0.2100, 0.4200,0.4480],
         [0.1925,0.2100, 0.6120,0.6400],
-
+        [0.2100,0.2200, 0.4360,0.4480],
+        [0.2100,0.2200, 0.6120,0.6240],
         [0.2050,0.2250, 0.4480,0.4680],
         [0.2050,0.2250, 0.5920,0.6120],
         [0.2150,0.2375, 0.4680,0.5040],
         [0.2150,0.2375, 0.5560,0.5920],
         [0.2200,0.2425, 0.5040,0.5560],
+
+
+        [0.2650,0.2850, 0.5320,0.5800], // e
+        [0.2700,0.2900, 0.5040,0.5320],
+        [0.2800,0.2950, 0.4800,0.5040],
+        [0.2950,0.3050, 0.4680,0.4960],
+        [0.3050,0.3450, 0.4600,0.4880],
+        [0.3450,0.3550, 0.4680,0.5000],
+        [0.3550,0.3675, 0.4800,0.5000],
+        [0.3525,0.3725, 0.5000,0.5160],
+        [0.3550,0.3750, 0.5160,0.5400],
+        [0.2850,0.3350, 0.5400,0.5680],
+        [0.3350,0.3775, 0.5400,0.5680],
+        [0.2675,0.2875, 0.5800,0.6120],
+        [0.2750,0.2950, 0.6120,0.6320],
+        [0.2850,0.2950, 0.6320,0.6480],
+        [0.2950,0.3050, 0.6200,0.6560],
+        [0.3050,0.3450, 0.6360,0.6640],
+        [0.3450,0.3600, 0.6320,0.6600],
+        [0.3600,0.3750, 0.6160,0.6520],
+
+
+        [0.4075,0.4300, 0.3960,0.4320], // i
+        [0.4075,0.4300, 0.4640,0.5290],
+        [0.4075,0.4300, 0.5290,0.5940],
+        [0.4075,0.4300, 0.5940,0.6600],
+
+
+        [0.4700,0.4900, 0.4640,0.5290], // r
+        [0.4700,0.4900, 0.5290,0.5940], 
+        [0.4700,0.4900, 0.5940,0.6600], 
+        [0.4900,0.5000, 0.4920,0.5160],
+        [0.4975,0.5100, 0.4800,0.4920],
+        [0.5000,0.5100, 0.4920,0.5040],
+        [0.5100,0.5275, 0.4680,0.5000],
+        [0.5275,0.5475, 0.4640,0.4960],
+
+
+        [0.5575,0.5800, 0.5440,0.5920], // d
+        [0.5600,0.5825, 0.5200,0.5440],
+        [0.5650,0.5875, 0.5000,0.5200],
+        [0.5750,0.5975, 0.4800,0.5000],
+        [0.5875,0.5975, 0.4640,0.4800],
+        [0.5975,0.6275, 0.4600,0.4680],
+        [0.5975,0.6350, 0.4680,0.4880],
+        [0.6350,0.6450, 0.4680,0.4960],
+        [0.5625,0.5825, 0.5920,0.6160],
+        [0.5675,0.5900, 0.6160,0.6360],
+        [0.5775,0.6325, 0.6360,0.6560],
+        [0.5900,0.6225, 0.6560,0.6640],
+        [0.6325,0.6450, 0.6200,0.6480],
+        [0.6450,0.6650, 0.3880,0.4780],
+        [0.6450,0.6650, 0.4780,0.5680],
+        [0.6450,0.6650, 0.5680,0.6600],
+
+
+        [0.7075,0.7275, 0.4640,0.5290], // r
+        [0.7075,0.7275, 0.5290,0.5940], 
+        [0.7075,0.7275, 0.5940,0.6600], 
+        [0.7275,0.7375, 0.4920,0.5160],
+        [0.7350,0.7475, 0.4800,0.4920],
+        [0.7375,0.7475, 0.4920,0.5040],
+        [0.7475,0.7650, 0.4680,0.5000],
+        [0.7650,0.7850, 0.4640,0.4960],
+
+
+        [0.7950,0.8150, 0.5320,0.5800], // e
+        [0.8000,0.8200, 0.5040,0.5320],
+        [0.8100,0.8250, 0.4800,0.5040],
+        [0.8250,0.8350, 0.4680,0.4960],
+        [0.8350,0.8750, 0.4600,0.4880],
+        [0.8750,0.8850, 0.4680,0.5000],
+        [0.8850,0.8975, 0.4800,0.5000],
+        [0.8825,0.9025, 0.5000,0.5160],
+        [0.8850,0.9050, 0.5160,0.5400],
+        [0.8150,0.9075, 0.5400,0.5680],
+        [0.7975,0.8175, 0.5800,0.6120],
+        [0.8050,0.8250, 0.6120,0.6320],
+        [0.8150,0.8250, 0.6320,0.6480],
+        [0.8250,0.8350, 0.6200,0.6560],
+        [0.8350,0.8750, 0.6360,0.6640],
+        [0.8750,0.8900, 0.6320,0.6600],
+        [0.8900,0.9050, 0.6160,0.6520],
 
     ];
 
@@ -79,7 +174,7 @@ function hello_world($p) {
 
     var messageList = [ {   text:"hello", 
                             x:0.050, y:0.100, fonkt:"20px Verdana", 
-                            on:Math.floor(0.05*frameCountMax), off:Math.floor(0.9000*frameCountMax), 
+                            on:Math.floor(0.00*frameCountMax), off:Math.floor(0.9000*frameCountMax), 
                             leftColor:"black", rightColor:null 
                         },
                         {   text:"you are a lovely person", 
@@ -175,8 +270,8 @@ function hello_world($p) {
         for (var i=0;i<stickyList.length;i++) {
             var box = { active:   true,
                         captured: 0,
-                        x_min:    Math.floor(stickyList[i][0]*width),
-                        x_max:    Math.floor(stickyList[i][1]*width),
+                        x_min:    Math.floor(stickyList[i][0]*aspectCorrectedWidth),
+                        x_max:    Math.floor(stickyList[i][1]*aspectCorrectedWidth),
                         y_min:    Math.floor(stickyList[i][2]*height),
                         y_max:    Math.floor(stickyList[i][3]*height),
                   }
@@ -193,6 +288,8 @@ function hello_world($p) {
 
     init_particles_star = function (isStar, originX, originY) {
         data = [];
+        dotsCaptured = 0;
+
         for (var i = 0; i < population; i++) {
             var newDot = {};
             newDot.radius = randomGaussian(radiusMean, radisuStandardDeviation, 1, 25);	// no less than 1, no more than 25
@@ -235,7 +332,8 @@ function hello_world($p) {
     boost_particles = function () {
         clickedX = $p.mouseX;
         clickedY = $p.mouseY;
-        init_particles_star(true, clickedX, clickedY);
+        //init_particles_star(true, clickedX, clickedY);
+        init_particles_star(false, clickedX, clickedY);
     }
 
 
@@ -246,6 +344,28 @@ function hello_world($p) {
     draw_point = function (i) {
         $p.fill(data[i].hue, data[i].saturation, data[i].brightness) ;
         $p.ellipse(data[i].x + 3, data[i].y - 3, data[i].radius, data[i].radius);
+    }
+
+
+    // ======================================================
+    // draw boxes
+    // ======================================================
+
+    var drawStickyBoxes = function () {
+        ctx.lineWidth = 1;
+        for (var box=0;box<stickyBoxes.length;box++) {
+            if (stickyBoxes[box].active) {
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(stickyBoxes[box].x_min,stickyBoxes[box].y_min,
+                               (stickyBoxes[box].x_max-stickyBoxes[box].x_min),
+                               (stickyBoxes[box].y_max-stickyBoxes[box].y_min));
+            } else {
+                ctx.fillStyle = "gray";
+                ctx.fillRect(stickyBoxes[box].x_min,stickyBoxes[box].y_min,
+                               (stickyBoxes[box].x_max-stickyBoxes[box].x_min),
+                               (stickyBoxes[box].y_max-stickyBoxes[box].y_min));
+            }
+        }
     }
 
 
@@ -311,6 +431,9 @@ function hello_world($p) {
         // adjust globals e.g. gravity
 		gravityAngle += gravityAngleIncrement;
 
+        if (showStickyBoxes)
+            drawStickyBoxes();
+
         // per dot, check all sticky boxes
         for (var dot=0; dot<data.length; dot++) {
             if (data[dot].active) {
@@ -323,6 +446,7 @@ function hello_world($p) {
                                 data[dot].x_v = 0;
                                 data[dot].y_v = 0;
                                 data[dot].active = false;
+                                dotsCaptured++;
                                 //if (++(stickyBoxes[box].captured) >= stickyBoxCaptureMax) {
                                 if (++(stickyBoxes[box].captured) >= stickyBoxes[box].captureMax) {
                                     stickyBoxes[box].active = false;
@@ -363,7 +487,8 @@ function hello_world($p) {
     // ======================================================
 
 
-    init_particles_star(true, clickedX, clickedY);
+    //init_particles_star(true, clickedX, clickedY);
+    init_particles_star(false, clickedX, clickedY);
 	console.log("started ",data.length," particles.");
     console.log("canvas extents ("+width+","+height+")");
 }
