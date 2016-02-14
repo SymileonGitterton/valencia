@@ -17,12 +17,15 @@ var dotsCaptured = 0;
     $p.colorMode($p.HSB, 255);
     $p.ellipseMode($p.CENTER);
 
-    var width = window.innerWidth-200;                  
-    var height = window.innerHeight-100;                // thanks D
+    //var width = window.innerWidth-200;                  
+    //var height = window.innerHeight-100;                // thanks D
+    var width = 900;
+    var height = 440;
     var aspectRatioCanvas     = width / height;
     var aspectRatioStickyText = 400.0 / 250.0;
     var aspectCorrection = aspectRatioStickyText / aspectRatioCanvas;
     var aspectCorrectedWidth = width * aspectCorrection;
+    var aspectCorrectedHeight = height * 0.9
     $p.size(width, height);
 
     console.log($p);
@@ -42,19 +45,20 @@ var dotsCaptured = 0;
     var areaDragFactor = 0.000001;//0.00001;	// 0 for no effect; 0.00001 or similar for bouncy little guys + sluggish big fellas
     var radiusMean = 8.0;
     var radisuStandardDeviation = 4.0;
-    var velocityMean = 10.0; //13.0;
+    var velocityMean = 9.0; //10.0; //13.0;
     var velocityStandardDeviation = 2.0; //4.0;
     var frameCount = 0;
     var clickedX = $p.width/2;
     var clickedY = $p.height/2;
     var convergeStartFrameCount =  50;
     var divergeStartFrameCount  = 150;
-    var frameCountMax = 20 * 60;
+    var frameCountMax = 24 * 60;
     var tractorBeamRange = Math.min($p.width,$p.height)/2;
     var captureRange = tractorBeamRange / 20;
     var tractorIdleSpeed = velocityMean / 10;
     var stickyBoxCaptureMax = population;
     var stickyBoxCaptureScale = 0.06; //0.038; // 1.0;
+    var dotModulo = population+1;
 
 
     var stickyList = [  
@@ -205,17 +209,17 @@ var dotsCaptured = 0;
                         },
 
                         {   text:"I hope we can always be friends",
-                            x:0.600, y:0.800, fonkt:"20px Verdana", 
+                            x:0.550, y:0.800, fonkt:"20px Verdana", 
                             on:Math.floor(0.60*frameCountMax), off:Math.floor(0.9125*frameCountMax), 
                             leftColor:"red", midColor:"magenta", rightColor:"red" 
                         },
-                        {   text:"in happiness",
-                            x:0.600, y:0.850, fonkt:"20px Verdana", 
+                        {   text:"for fun happy times",
+                            x:0.550, y:0.850, fonkt:"20px Verdana", 
                             on:Math.floor(0.65*frameCountMax), off:Math.floor(0.9150*frameCountMax), 
                             leftColor:"magenta", midColor:"red", rightColor:"magenta" 
                         },
                         {   text:"I love you",
-                            x:0.600, y:0.900, fonkt:"20px Verdana", 
+                            x:0.550, y:0.900, fonkt:"20px Verdana", 
                             on:Math.floor(0.80*frameCountMax), off:Math.floor(0.98*frameCountMax), 
                             leftColor:"black", rightColor:"black" 
                         },
@@ -267,18 +271,32 @@ var dotsCaptured = 0;
     // ======================================================
 
     var initializeStickyBoxes = function() {
+        stickyBoxes = [];
         for (var i=0;i<stickyList.length;i++) {
             var box = { active:   true,
                         captured: 0,
                         x_min:    Math.floor(stickyList[i][0]*aspectCorrectedWidth),
                         x_max:    Math.floor(stickyList[i][1]*aspectCorrectedWidth),
-                        y_min:    Math.floor(stickyList[i][2]*height),
-                        y_max:    Math.floor(stickyList[i][3]*height),
+                        y_min:    Math.floor(stickyList[i][2]*aspectCorrectedHeight),
+                        y_max:    Math.floor(stickyList[i][3]*aspectCorrectedHeight),
                   }
             box.captureMax = Math.floor(stickyBoxCaptureScale*((box.x_max-box.x_min) * (box.y_max-box.y_min)));
-            console.log(box.captureMax);
+            //console.log(box.captureMax);
             stickyBoxes.push(box);
         }
+    }
+
+
+    // ======================================================
+    // dot color discriminator
+    // ======================================================
+
+    var isBasicallyRed = function(dot) {
+        if (dotModulo >= population) 
+            return false;
+        else
+            return (((data[dot].hue >= 0x00) && (data[dot].hue <= 0x0f)) ||
+                    ((data[dot].hue >= 0xf0) && (data[dot].hue <= 0xff)) );
     }
 
 
@@ -289,6 +307,24 @@ var dotsCaptured = 0;
     init_particles_star = function (isStar, originX, originY) {
         data = [];
         dotsCaptured = 0;
+
+        //      00 10 90 a0 b0 c0 d0 e0 f0
+        // not: 20 30 40 50 60 70 80
+        var colorSpan = 0;
+        var colorBase = Math.floor(Math.random() * 10);
+        switch (colorBase) {
+            case 0:     
+            case 1:     colorBase = colorBase << 4;
+                        colorSpan = 16;    
+                        break;
+            case 2:     colorBase = 0;  
+                        colorSpan = 255;    
+                        break;
+            default:    colorBase = (colorBase << 4) + 0x60;
+                        colorSpan = 16;
+                        break;
+        }
+        console.log("colors from 0x"+colorBase.toString(16)+" to 0x"+(colorBase+colorSpan-1).toString(16));
 
         for (var i = 0; i < population; i++) {
             var newDot = {};
@@ -306,7 +342,12 @@ var dotsCaptured = 0;
             newDot.x_v = magnitude * Math.cos(angle);
             newDot.y_v = magnitude * Math.sin(angle);
             
-            newDot.hue = Math.random() * 255;
+            //newDot.hue = Math.random() * 255;
+            if ((i%dotModulo) === (dotModulo-1))
+                newDot.hue = Math.floor(Math.random() * 16);    // reds
+            else 
+                newDot.hue = colorBase+Math.floor((Math.random() * colorSpan));
+
             newDot.saturation = 128 + (Math.random() * 127);	// dippin dots instead of wonderbread...
             newDot.brightness = 240 + (Math.random() * 15);
             newDot.y_max = $p.height - (newDot.radius / 2) - 10;
@@ -356,10 +397,12 @@ var dotsCaptured = 0;
         for (var box=0;box<stickyBoxes.length;box++) {
             if (stickyBoxes[box].active) {
                 ctx.strokeStyle = "black";
+                ctx.fillStyle = null;
                 ctx.strokeRect(stickyBoxes[box].x_min,stickyBoxes[box].y_min,
                                (stickyBoxes[box].x_max-stickyBoxes[box].x_min),
                                (stickyBoxes[box].y_max-stickyBoxes[box].y_min));
             } else {
+                ctx.strokeStyle = "red";
                 ctx.fillStyle = "gray";
                 ctx.fillRect(stickyBoxes[box].x_min,stickyBoxes[box].y_min,
                                (stickyBoxes[box].x_max-stickyBoxes[box].x_min),
@@ -438,7 +481,7 @@ var dotsCaptured = 0;
         for (var dot=0; dot<data.length; dot++) {
             if (data[dot].active) {
                 for (var box=0; box<stickyBoxes.length; box++) {
-                    if ((stickyBoxes[box].active)) {
+                    if ((stickyBoxes[box].active) && !isBasicallyRed(dot)) {
                         if ((data[dot].x >= stickyBoxes[box].x_min) &&  
                             (data[dot].x <= stickyBoxes[box].x_max) &&
                             (data[dot].y >= stickyBoxes[box].y_min) &&
@@ -486,11 +529,11 @@ var dotsCaptured = 0;
     // start system
     // ======================================================
 
-
+	console.log("starting ",data.length," particles.");
+    console.log("canvas extents ("+width+","+height+")");
     //init_particles_star(true, clickedX, clickedY);
     init_particles_star(false, clickedX, clickedY);
-	console.log("started ",data.length," particles.");
-    console.log("canvas extents ("+width+","+height+")");
+
 }
 
 
